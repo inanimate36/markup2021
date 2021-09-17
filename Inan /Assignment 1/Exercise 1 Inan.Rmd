@@ -1,0 +1,80 @@
+---
+title: "Inan/Assignment 1 draft"
+author: "Inan Bostanci"
+date: "9/17/2021"
+output:
+  html_document:
+    df_print: paged
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r message = FALSE}
+library(tidyverse)
+library(dplyr)
+```
+
+Draw 100 times 100 samples from normal distribution
+```{r}
+set.seed(666)
+samps <- list()
+for (i in 1:100){
+  samps[[i]] <- rnorm(100, 0, 1)
+}
+```
+
+Function for summary statistics
+```{r}
+sumry <- function(x){
+  M <- mean(x)
+  DF <- length(x) - 1
+  SE <- 1 / sqrt(length(x))
+  INT <- qt(.975, DF) * SE
+  return(c(M, M-0, SE, M-INT, M+INT))
+}
+format <- c("Mean" = 0, "Bias" = 0, "Std.Err" = 0, "Lower" = 0, "Upper" = 0)
+```
+
+Apply function to samples and get a df with results
+```{r}
+results <- samps %>%
+  vapply(., sumry, format) %>%
+  t()
+```
+
+Create variable that tracks if CI coveres the true value
+```{r}
+results <- results %>%
+  as.data.frame() %>%
+  mutate(Covered = Lower < 0 & 0 < Upper)
+```
+
+Print sample CIs that don't cover true value
+```{r}
+results %>% filter(!Covered)
+```
+
+Table of results
+```{r}
+library(DT)
+#results$Covered <- as.numeric(results$Covered)
+results %>% mutate(Covered = as.numeric(Covered)) %>% 
+  round(4) %>% 
+  datatable()
+```
+
+Plot samples with 95% CI and true value
+```{r}
+library(ggplot2)
+limits <- aes(ymax = results$Upper, ymin = results$Lower)
+results %>% mutate(Covered = as.factor(Covered)) %>% 
+ggplot(aes(y=Mean, x=1:100, colour = Covered)) + 
+  geom_hline(aes(yintercept = 0), color = "dark grey", size = 2) + 
+  geom_pointrange(limits) + 
+  xlab("Simulations 1-100") +
+  ylab("Means and 95% Confidence Intervals")
+```
+

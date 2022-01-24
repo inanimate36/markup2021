@@ -1,0 +1,128 @@
+---
+title: "Presentation of random things"
+author: "Inan Bostanci"
+date: "1/24/2022"
+output: 
+  ioslides_presentation:
+    css: style.css
+    incremental: yes
+    logo: logo.png
+    widescreen: yes
+    keep_md: yes
+runtime: shiny
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+library(shiny)
+library(dplyr)
+require(DT)
+require(plotly)
+```
+
+## R Markdown
+
+In this presentation I just show random things to tick off the boxes of the exercise, because I can't come up with an actual topic right now. 
+
+See the logo of utrecht university, which is 100% responsible for the entire content of this presentation (its not). 
+
+## figure aligned in center - check
+
+<center>
+
+<div style="float: center; width: 50%;">
+<div align="center">
+<img src="cringyquote.png" width=400>
+</div>
+</div>
+
+</center>
+
+## Interactive table - check! (also kinda dark :/ ) 
+
+```{r cars, echo = FALSE}
+datatable(USArrests, options = list(pageLength = 6))
+```
+
+## Interactive graph - check! 
+
+
+```{r , echo=FALSE,message = FALSE, fig.keep='all'}
+dat <- USArrests
+
+p <- ggplot(dat, aes(x = Murder, y = UrbanPop)) + 
+  geom_point() + 
+  ggtitle("Murder vs. Urban Population")
+ggplotly(p)
+```
+
+
+
+```{r enron, echo = FALSE, include = FALSE}
+require(plotly)
+require(igraph)
+library(igraphdata)
+data("enron")
+
+# ein subgraph, bei der nur die emails mit thema drin sind (alle über 0)
+enron2 <- subgraph.edges(enron, which(E(enron)$LDC_topic > 0))
+
+# simplify aber ohne die multiples zu removen
+enron3 <- simplify(enron2, remove.multiple = FALSE, remove.loops = TRUE)
+
+# die nodes, die keinen kontakt haben, werden nicht mitanalyisiert
+enron4 <- enron3 - vertices(c("71","87", "117", "149"))
+
+received <- sapply(1:vcount(enron4), function(i) {
+ length(table(E(enron4)[to (i)]$LDC_topic))})
+received
+
+#Als Knotenattribut
+V(enron4)$received <- received
+##############
+
+##############
+# durch die Knotenattribute werden doppelte Kanten nicht mehr gebraucht
+enron5 <- simplify(enron4)
+
+##############
+# constraint-maß als variable 
+const <- constraint(enron5)
+
+V(enron5)$const <- constraint(enron5)
+
+V(enron5)[const <  "0.08591"]$color <- "green"
+V(enron5)[const >  "0.08591"]$color <- "red"
+```
+
+<style>
+.forceBreak { -webkit-column-break-after: always; break-after: column; }
+</style>
+
+## Two-collumn slide - check! (also cached and not displayed code) {.columns-2 .smaller}
+
+
+This is a plot of the e-mails send at enron - a US company that was closed down due to fraud in the early 2000s, and all their e-mails were made publicly accessible. 
+
+This is a gold mine for social network researchers, because it contains over 30.000 e-mails from hundreds of employees. 
+
+Fun fact: I attended a course on empirical network analysis during my bachelors, which was the first time that I worked in R. 
+
+<p class="forceBreak"></p>
+
+```{r enron plot, echo = FALSE, cache = TRUE}
+plot(enron5, vertex.size=(V(enron5)$received)*0.5^2, edge.arrow.size=0, 
+     edge.width = 0.4, edge.color = "blue", vertex.label = NA, layout = layout_with_fr)
+```
+
+## code that isn't executed - check!
+The network dataset can be downloaded the following way:
+
+```{r, echo = TRUE, eval=FALSE}
+require(igraph)
+library(igraphdata)
+data("enron")
+```
+
+
+

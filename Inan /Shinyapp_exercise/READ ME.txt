@@ -1,0 +1,1 @@
+I tried publishing this with shinyapps.io. Although R is connected to my shinyapps account, the app does not appear on my shinyapps account after publishing. Therefore, this shinyapp has to be run locally until this issue is fixed. 
